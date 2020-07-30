@@ -1,0 +1,3 @@
+---
+- name: restart ovsovn.service
+  action: service name=ovsovn enabled=yes state=restarted

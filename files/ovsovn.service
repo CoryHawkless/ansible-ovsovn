@@ -1,0 +1,14 @@
+[Unit]
+Description=ACS2 OpenVSwitch and OVN Controller service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=forking
+RestartSec=5
+
+ExecStart=/usr/sbin/ovsovn-service-manager.sh START
+ExecStop=/usr/sbin/ovsovn-service-manager.sh STOP
+
+[Install]
+WantedBy=multi-user.target

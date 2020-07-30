@@ -1,0 +1,132 @@
+- name: "Checking presense of OpenVsitch and comparing MD5 hash value"
+  stat:
+    path: /usr/sbin/ovsdb-server
+    checksum_algorithm: md5
+  register: ovsdb_server_exists
+
+# This will ensure that all OpenvSwitch binaries are running the desired version, based on the MD5 value stored in the variables file
+# When releasing a new version of ovs, update this md5 an update the copy and install tasks below
+
+- name: "Set fact to False"
+  set_fact:
+    force_new_ovs_download: False
+
+- name: "Set fact to true if the source file exists but the MD5 sum does not match"
+  set_fact:
+    force_new_ovs_download: "{{ ovsdb_server_exists.stat.checksum != ovsdb_server_md5_value }}"
+  when: ovsdb_server_exists.stat.exists == True
+
+
+- name: "Set fact to true if the source file does not exist"
+  set_fact:
+    force_new_ovs_download: True
+  when: ovsdb_server_exists.stat.exists == False
+
+- debug: msg="Installing OpenVSwitch"
+  when: force_new_ovs_download == True
+
+- debug: msg="NOT Installing OpenVSwitch, MD5 sum matches"
+  when: force_new_ovs_download == False
+
+- name: "Copy OVN binaries"
+  copy:
+    src: "{{item}}"
+    dest: "/tmp/{{item}}"
+  with_items:
+    - libopenvswitch_2.13.0-1_amd64.deb
+    - openvswitch-common_2.13.0-1_amd64.deb
+    - openvswitch-switch_2.13.0-1_amd64.deb
+  when: force_new_ovs_download == True
+
+
+
+
+- name: "Install packages"
+  apt:
+    deb: "{{ item }}"
+  with_items:
+    - "/tmp/libopenvswitch_2.13.0-1_amd64.deb"
+    - "/tmp/openvswitch-common_2.13.0-1_amd64.deb"
+    - "/tmp/openvswitch-switch_2.13.0-1_amd64.deb"
+  when: force_new_ovs_download == True
+
+
+
+
+
+
+
+
+
+- name: "Checking presense of OVN and comparing MD5 hash value"
+  stat:
+    path: /usr/bin/ovn-nbctl
+    checksum_algorithm: md5
+  register: ovn_nbctl_exists
+
+# This will ensure that all OVN binaries are running the desired version, based on the MD5 value stored in the variables file
+# When releasing a new version of OVN, update this md5 an update the copy and install tasks below
+
+- name: "Set fact to False"
+  set_fact:
+    force_new_ovn_download: False
+
+- name: "Set fact to true if the source file exists but the MD5 sum does not match"
+  set_fact:
+    force_new_ovn_download: "{{ ovn_nbctl_exists.stat.checksum != ovn_nbctl_md5_value }}"
+  when: ovn_nbctl_exists.stat.exists == True
+
+#- debug: msg={{ovn_nbctl_md5_value}}
+#- debug: msg={{ovn_nbctl_exists}}
+
+- name: "Set fact to true if the source file does not exist"
+  set_fact:
+    force_new_ovn_download: True
+  when: ovn_nbctl_exists.stat.exists == False
+
+- debug: msg="Installing OVN"
+  when: force_new_ovn_download == True
+
+- debug: msg="NOT Installing OVN, MD5 sum matches"
+  when: force_new_ovn_download == False
+
+- name: "Copy OVN binaries"
+  copy:
+    src: "{{item}}"
+    dest: "/tmp/{{item}}"
+  with_items:
+    - ovn_20.06.0-1_amd64.deb
+  when: force_new_ovn_download == True
+
+- name: "Install packages"
+  apt:
+    deb: "{{ item }}"
+  with_items:
+    - "/tmp/ovn_20.06.0-1_amd64.deb"
+  when: force_new_ovn_download == True
+
+
+
+#Install the custom service to start OVS and OVN as required
+- name: "Copy /usr/sbin/ovsovn-service-manager.sh file"
+  template:
+    src: ovsovn-service-manager.sh.j2
+    dest: "/usr/sbin/ovsovn-service-manager.sh"
+    mode: +x
+  notify:
+   - restart ovsovn.service
+  tags: service
+
+- name: "Configure ovsovn.service"
+  action: template src=files/ovsovn.service dest=/etc/systemd/system/ovsovn.service backup=no
+  notify:
+   - restart ovsovn.service
+  tags: service
+
+- name: "Reload systemctl then enable & start ovsovn service"
+  systemd:
+    state: started
+    enabled: True
+    daemon_reload: yes
+    name:  ovsovn.service
+  tags: service
