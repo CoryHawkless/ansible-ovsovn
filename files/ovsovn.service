@@ -1,5 +1,5 @@
 [Unit]
-Description=ACS2 OpenVSwitch and OVN Controller service
+Description=OpenVSwitch and OVN Controller service
 After=network.target
 StartLimitIntervalSec=0
 
