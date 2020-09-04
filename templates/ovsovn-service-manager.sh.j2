@@ -29,7 +29,7 @@ START(){
     /usr/share/ovn/scripts/ovn-ctl start_controller
     echo "OVS and OVN started"
 
-{% if ansible_fqdn in groups['compute-nodes'] %}
+{% if ansible_fqdn in groups['compute_nodes'] %}
     echo "Bringing online br-provider for WAN1"
     ovs-vsctl --may-exist add-br br-provider
     ovs-vsctl set open . external-ids:ovn-bridge-mappings=WAN1:br-provider
