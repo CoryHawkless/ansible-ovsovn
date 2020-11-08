@@ -8,7 +8,7 @@ echo "ZZZ $1"
 
 START(){
     hostname=$(hostname)
-    loopbackIP={{LAN_IP}}
+    loopbackIP={{host_loopback_IP}}
     controllerIP={{OVN_VIP}}
     echo "Starting OpenVSwitch and OVN on $hostname with $loopbackIP and pointing to OVN controller $controllerIP"
 
