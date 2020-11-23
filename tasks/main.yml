@@ -105,10 +105,11 @@
     - "/tmp/ovn_20.09.0-1_amd64.deb"
   when: force_new_ovn_download == True
 
+- set_fact: ovn_nb_group_name_rendered="{{hostvars[ansible_hostname].ovn_nb_db_group}}"
 
 - name: Generate OVN NB Connection fact
   set_fact: OVN_NB_Connection="{% for host in groups[ovn_nb_group_name_rendered] %}tcp:{{ hostvars[host].host_loopback_IP }}:6641{% if not loop.last %},{% endif %}{% endfor %}"
-  
+
 
 #Install the custom service to start OVS and OVN as required
 - name: "Copy /usr/sbin/ovsovn-service-manager.sh file"
