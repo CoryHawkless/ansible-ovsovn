@@ -9,8 +9,8 @@ echo "ZZZ $1"
 START(){
     hostname=$(hostname)
     loopbackIP={{host_loopback_IP}}
-    
-    echo "Starting OpenVSwitch and OVN on $hostname with $loopbackIP and pointing to OVN controller {{OVN_NB_Connection}}"
+
+    echo "Starting OpenVSwitch and OVN on $hostname with $loopbackIP and pointing to OVN controller {{OVN_SB_Connection}}"
 
     DIR="/var/run/openvswitch/db.sock"
     if [ -d "$DIR" ]; then
@@ -23,7 +23,7 @@ START(){
     ovs-appctl -t ovsdb-server ovsdb-server/add-remote ptcp:6640
 
     ovs-vsctl set open . external-ids:ovn-bridge=br-int
-    ovs-vsctl set open . external-ids:ovn-remote={{OVN_NB_Connection}}
+    ovs-vsctl set open . external-ids:ovn-remote={{OVN_SB_Connection}}
     ovs-vsctl set open . external-ids:ovn-encap-type=geneve
     ovs-vsctl set open . external-ids:ovn-encap-ip=$loopbackIP
     /usr/share/ovn/scripts/ovn-ctl start_controller
