@@ -8,9 +8,9 @@ echo "ZZZ $1"
 
 START(){
     hostname=$(hostname)
-    loopbackIP={{this_host_ip_rendered}}
-    controllerIP={{OVN_VIP}}
-    echo "Starting OpenVSwitch and OVN on $hostname with $loopbackIP and pointing to OVN controller $controllerIP"
+    loopbackIP={{host_loopback_IP}}
+
+    echo "Starting OpenVSwitch and OVN on $hostname with $loopbackIP and pointing to OVN controller {{OVN_SB_Connection}}"
 
     DIR="/var/run/openvswitch/db.sock"
     if [ -d "$DIR" ]; then
@@ -21,9 +21,10 @@ START(){
     /usr/share/openvswitch/scripts/ovs-ctl start --system-id=$hostname
     #Instruct OVSDB to listen on 127.0.0.2:6640 so the ovs-vsctl command from within a container can access OpenVswitch
     ovs-appctl -t ovsdb-server ovsdb-server/add-remote ptcp:6640
-
+    ovs-vsctl del-br br-int
+    
     ovs-vsctl set open . external-ids:ovn-bridge=br-int
-    ovs-vsctl set open . external-ids:ovn-remote=tcp:$controllerIP:6642
+    ovs-vsctl set open . external-ids:ovn-remote={{OVN_SB_Connection}}
     ovs-vsctl set open . external-ids:ovn-encap-type=geneve
     ovs-vsctl set open . external-ids:ovn-encap-ip=$loopbackIP
     /usr/share/ovn/scripts/ovn-ctl start_controller

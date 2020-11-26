@@ -4,8 +4,9 @@ After=network.target
 StartLimitIntervalSec=0
 
 [Service]
-Type=forking
+Type=oneshot
 RestartSec=5
+RemainAfterExit=true
 
 ExecStart=/usr/sbin/ovsovn-service-manager.sh START
 ExecStop=/usr/sbin/ovsovn-service-manager.sh STOP
