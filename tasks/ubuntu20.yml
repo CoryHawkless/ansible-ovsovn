@@ -1,6 +1,6 @@
 - set_fact:
     ovsdb_server_md5_value: "2183d20b8df5b5cb790aa238f6e1432e"
- 
+
 - set_fact:
     ovn_nbctl_md5_value: "6007bc53bf30b8d4b4c0fab039ee576b"
 
@@ -23,12 +23,12 @@
 
 - name: "Copy OVN binaries"
   copy:
-    src: "{{item}}"
+    src: "ubuntu20/{{item}}"
     dest: "/tmp/{{item}}"
   with_items:
-    - ubuntu20/libopenvswitch_2.14.0-1_amd64.deb
-    - ubuntu20/openvswitch-common_2.14.0-1_amd64.deb
-    - ubuntu20/openvswitch-switch_2.14.0-1_amd64.deb
+    - libopenvswitch_2.14.0-1_amd64.deb
+    - openvswitch-common_2.14.0-1_amd64.deb
+    - openvswitch-switch_2.14.0-1_amd64.deb
   when: force_new_ovs_download == True
 
 
@@ -71,10 +71,10 @@
 
 - name: "Copy OVN binaries"
   copy:
-    src: "{{item}}"
+    src: "ubuntu20/{{item}}"
     dest: "/tmp/{{item}}"
   with_items:
-    - ubuntu20/ovn_20.06.0-1_amd64.deb
+    - ovn_20.06.0-1_amd64.deb
   when: force_new_ovn_download == True
 
 - name: "Install packages"
