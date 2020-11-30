@@ -1,6 +1,6 @@
 - set_fact:
     ovsdb_server_md5_value: "2183d20b8df5b5cb790aa238f6e1432e"
-
+ 
 - set_fact:
     ovn_nbctl_md5_value: "6007bc53bf30b8d4b4c0fab039ee576b"
 
