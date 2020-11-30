@@ -4,13 +4,12 @@ if [ "$#" -ne 1 ]; then
     echo "Illegal number of parameters"
     exit 1
 fi
-echo "ZZZ $1"
+echo "Command recieved: $1"
 
 START(){
     hostname=$(hostname)
     loopbackIP={{host_loopback_IP}}
 
-    echo "Starting OpenVSwitch and OVN on $hostname with $loopbackIP and pointing to OVN controller {{OVN_SB_Connection}}"
 
     DIR="/var/run/openvswitch/db.sock"
     if [ -d "$DIR" ]; then
@@ -19,16 +18,23 @@ START(){
     fi
 
     /usr/share/openvswitch/scripts/ovs-ctl start --system-id=$hostname
+    echo "OVS started"
     #Instruct OVSDB to listen on 127.0.0.2:6640 so the ovs-vsctl command from within a container can access OpenVswitch
     ovs-appctl -t ovsdb-server ovsdb-server/add-remote ptcp:6640
     #ovs-vsctl del-br br-int
 
+{% if use_ovn is defined and use_ovn == true %}
+    echo "Starting OpenVSwitch and OVN on $hostname with $loopbackIP and pointing to OVN controller {{OVN_SB_Connection}}"
     ovs-vsctl set open . external-ids:ovn-bridge=br-int
     ovs-vsctl set open . external-ids:ovn-remote={{OVN_SB_Connection}}
     ovs-vsctl set open . external-ids:ovn-encap-type=geneve
     ovs-vsctl set open . external-ids:ovn-encap-ip=$loopbackIP
     /usr/share/ovn/scripts/ovn-ctl start_controller
     echo "OVS and OVN started"
+{% else %}
+
+
+{% endif %}
 
 {% if ansible_fqdn in groups['compute_nodes'] %}
     echo "Bringing online br-provider for WAN1"
@@ -40,11 +46,16 @@ START(){
 
 }
 STOP() {
-    echo "Stopping OpenVSwitch and OVN"
+{% if use_ovn is defined and use_ovn == true %}
+    echo "Stopping OVN"
     /usr/share/ovn/scripts/ovn-ctl stop_controller
     /usr/share/ovn/scripts/ovn-ctl stop_ovsdb
-    /usr/share/openvswitch/scripts/ovs-ctl stop
     echo "OpenVSwitch and OVN Stopped"
+{% else %}
+    echo "Stopping OpenVSwitch"
+    /usr/share/openvswitch/scripts/ovs-ctl stop
+    echo "OpenVSwitch Stopped"
+{% endif %}
 }
 
 case $1 in
