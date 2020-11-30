@@ -1,7 +1,9 @@
-#OVS Version 2.14.0 \ Ubuntu 20
-- set_fact: ovsdb_server_md5_value:   "ffd9ba2a6b3da6108d7eb97c70e51761"
-#OVN Version 20.09.0 \ Ubuntu 20
-- set_fact: ovn_nbctl_md5_value:      "031e770fd969617c221b156726c2f1dc"
+
+- set_fact:
+    ovsdb_server_md5_value: "ffd9ba2a6b3da6108d7eb97c70e51761"
+
+- set_fact:
+    ovn_nbctl_md5_value: "031e770fd969617c221b156726c2f1dc"
 
 
 - name: "Set fact to true if the source file exists but the MD5 sum does not match"
