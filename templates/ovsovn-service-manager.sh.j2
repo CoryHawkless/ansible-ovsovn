@@ -21,8 +21,8 @@ START(){
     /usr/share/openvswitch/scripts/ovs-ctl start --system-id=$hostname
     #Instruct OVSDB to listen on 127.0.0.2:6640 so the ovs-vsctl command from within a container can access OpenVswitch
     ovs-appctl -t ovsdb-server ovsdb-server/add-remote ptcp:6640
-    ovs-vsctl del-br br-int
-    
+    #ovs-vsctl del-br br-int
+
     ovs-vsctl set open . external-ids:ovn-bridge=br-int
     ovs-vsctl set open . external-ids:ovn-remote={{OVN_SB_Connection}}
     ovs-vsctl set open . external-ids:ovn-encap-type=geneve

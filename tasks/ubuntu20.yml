@@ -1,0 +1,84 @@
+#OVS Version 2.14.0 \ Ubuntu 20
+- set_fact: ovsdb_server_md5_value:   "2183d20b8df5b5cb790aa238f6e1432e"
+#OVN Version 20.09.0 \ Ubuntu 20
+- set_fact: ovn_nbctl_md5_value:      "6007bc53bf30b8d4b4c0fab039ee576b"
+
+- name: "Set fact to true if the source file exists but the MD5 sum does not match"
+  set_fact:
+    force_new_ovs_download: "{{ ovsdb_server_exists.stat.checksum != ovsdb_server_md5_value }}"
+  when: ovsdb_server_exists.stat.exists == True
+
+
+- name: "Set fact to true if the source file does not exist"
+  set_fact:
+    force_new_ovs_download: True
+  when: ovsdb_server_exists.stat.exists == False
+
+- debug: msg="Installing OpenVSwitch"
+  when: force_new_ovs_download == True
+
+- debug: msg="NOT Installing OpenVSwitch, MD5 sum matches"
+  when: force_new_ovs_download == False
+
+- name: "Copy OVN binaries"
+  copy:
+    src: "{{item}}"
+    dest: "/tmp/{{item}}"
+  with_items:
+    - ubuntu20/libopenvswitch_2.14.0-1_amd64.deb
+    - ubuntu20/openvswitch-common_2.14.0-1_amd64.deb
+    - ubuntu20/openvswitch-switch_2.14.0-1_amd64.deb
+  when: force_new_ovs_download == True
+
+
+
+
+- name: "Install packages"
+  apt:
+    deb: "{{ item }}"
+  with_items:
+    - "/tmp/libopenvswitch_2.14.0-1_amd64.deb"
+    - "/tmp/openvswitch-common_2.14.0-1_amd64.deb"
+    - "/tmp/openvswitch-switch_2.14.0-1_amd64.deb"
+  when: force_new_ovs_download == True
+
+
+
+
+
+
+
+
+- name: "Set fact to true if the source file exists but the MD5 sum does not match"
+  set_fact:
+    force_new_ovn_download: "{{ ovn_nbctl_exists.stat.checksum != ovn_nbctl_md5_value }}"
+  when: ovn_nbctl_exists.stat.exists == True
+
+#- debug: msg={{ovn_nbctl_md5_value}}
+#- debug: msg={{ovn_nbctl_exists}}
+
+- name: "Set fact to true if the source file does not exist"
+  set_fact:
+    force_new_ovn_download: True
+  when: ovn_nbctl_exists.stat.exists == False
+
+- debug: msg="Installing OVN"
+  when: force_new_ovn_download == True
+
+- debug: msg="NOT Installing OVN, MD5 sum matches"
+  when: force_new_ovn_download == False
+
+- name: "Copy OVN binaries"
+  copy:
+    src: "{{item}}"
+    dest: "/tmp/{{item}}"
+  with_items:
+    - ubuntu20/ovn_20.06.0-1_amd64.deb
+  when: force_new_ovn_download == True
+
+- name: "Install packages"
+  apt:
+    deb: "{{ item }}"
+  with_items:
+    - "/tmp/ovn_20.06.0-1_amd64.deb"
+  when: force_new_ovn_download == True

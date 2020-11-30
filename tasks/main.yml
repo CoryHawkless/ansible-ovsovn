@@ -1,3 +1,20 @@
+#OVS Version 2.13.0 \ Ubuntu 18
+#ovsdb_server_md5_value: "f0a820cb40824c3a9f87f57644037d64"
+#OVN Version 20.06.0 \ Ubuntu 18
+#ovn_nbctl_md5_value: "4310864bd9676925a49909013071cbec"
+
+#OVS Version 2.14.0 \ Ubuntu 18
+#ovsdb_server_md5_value:   "ffd9ba2a6b3da6108d7eb97c70e51761"
+#OVN Version 20.09.0 \ Ubuntu 18
+#ovn_nbctl_md5_value:      "031e770fd969617c221b156726c2f1dc"
+
+#OVS Version 2.14.0 \ Ubuntu 20
+#ovsdb_server_md5_value:   "2183d20b8df5b5cb790aa238f6e1432e"
+#OVN Version 20.09.0 \ Ubuntu 20
+#ovn_nbctl_md5_value:      "6007bc53bf30b8d4b4c0fab039ee576b"
+
+
+
 - name: "Checking presense of OpenVsitch and comparing MD5 hash value"
   stat:
     path: /usr/sbin/ovsdb-server
@@ -10,53 +27,6 @@
 - name: "Set fact to False"
   set_fact:
     force_new_ovs_download: False
-
-- name: "Set fact to true if the source file exists but the MD5 sum does not match"
-  set_fact:
-    force_new_ovs_download: "{{ ovsdb_server_exists.stat.checksum != ovsdb_server_md5_value }}"
-  when: ovsdb_server_exists.stat.exists == True
-
-
-- name: "Set fact to true if the source file does not exist"
-  set_fact:
-    force_new_ovs_download: True
-  when: ovsdb_server_exists.stat.exists == False
-
-- debug: msg="Installing OpenVSwitch"
-  when: force_new_ovs_download == True
-
-- debug: msg="NOT Installing OpenVSwitch, MD5 sum matches"
-  when: force_new_ovs_download == False
-
-- name: "Copy OVN binaries"
-  copy:
-    src: "{{item}}"
-    dest: "/tmp/{{item}}"
-  with_items:
-    - libopenvswitch_2.14.0-1_amd64.deb
-    - openvswitch-common_2.14.0-1_amd64.deb
-    - openvswitch-switch_2.14.0-1_amd64.deb
-  when: force_new_ovs_download == True
-
-
-
-
-- name: "Install packages"
-  apt:
-    deb: "{{ item }}"
-  with_items:
-    - "/tmp/libopenvswitch_2.14.0-1_amd64.deb"
-    - "/tmp/openvswitch-common_2.14.0-1_amd64.deb"
-    - "/tmp/openvswitch-switch_2.14.0-1_amd64.deb"
-  when: force_new_ovs_download == True
-
-
-
-
-
-
-
-
 
 - name: "Checking presense of OVN and comparing MD5 hash value"
   stat:
@@ -71,47 +41,34 @@
   set_fact:
     force_new_ovn_download: False
 
-- name: "Set fact to true if the source file exists but the MD5 sum does not match"
-  set_fact:
-    force_new_ovn_download: "{{ ovn_nbctl_exists.stat.checksum != ovn_nbctl_md5_value }}"
-  when: ovn_nbctl_exists.stat.exists == True
 
-#- debug: msg={{ovn_nbctl_md5_value}}
-#- debug: msg={{ovn_nbctl_exists}}
 
-- name: "Set fact to true if the source file does not exist"
-  set_fact:
-    force_new_ovn_download: True
-  when: ovn_nbctl_exists.stat.exists == False
 
-- debug: msg="Installing OVN"
-  when: force_new_ovn_download == True
+- name: Include tasks based on OS being Ubuntu 18
+  include_tasks: ubuntu18.yml
+  when:
+    - ansible_distribution_major_version=="18"
+    - ansible_distribution == "Ubuntu"
+  tags: ceph
 
-- debug: msg="NOT Installing OVN, MD5 sum matches"
-  when: force_new_ovn_download == False
+- name: Include tasks based on OS being Ubuntu 20
+  include_tasks: ubuntu20.yml
+  when:
+    - ansible_distribution_major_version=="20"
+    - ansible_distribution == "Ubuntu"
+  tags: ceph
 
-- name: "Copy OVN binaries"
-  copy:
-    src: "{{item}}"
-    dest: "/tmp/{{item}}"
-  with_items:
-    - ovn_20.09.0-1_amd64.deb
-  when: force_new_ovn_download == True
 
-- name: "Install packages"
-  apt:
-    deb: "{{ item }}"
-  with_items:
-    - "/tmp/ovn_20.09.0-1_amd64.deb"
-  when: force_new_ovn_download == True
 
-- set_fact: ovn_sb_group_name_rendered="{{hostvars[ansible_hostname].ovn_sb_db_group}}"
-  tags: service
 
-- name: Generate OVN SB Connection fact
-  set_fact: OVN_SB_Connection="{% for host in groups[ovn_sb_group_name_rendered] %}tcp:{{ hostvars[host].host_loopback_IP }}:6642{% if not loop.last %},{% endif %}{% endfor %}"
-  tags: service
-  
+
+
+
+
+
+
+
+
 #Install the custom service to start OVS and OVN as required
 - name: "Copy /usr/sbin/ovsovn-service-manager.sh file"
   template:
