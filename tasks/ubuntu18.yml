@@ -76,7 +76,7 @@
     src: "ubuntu18/{{item}}"
     dest: "/tmp/{{item}}"
   with_items:
-    - ovn_20.06.0-1_amd64.deb
+    - ovn_20.09.0-1_amd64.deb
   when: force_new_ovn_download == True
 
 - name: "Install packages"
