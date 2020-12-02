@@ -28,9 +28,9 @@
     src: "ubuntu18/{{item}}"
     dest: "/tmp/{{item}}"
   with_items:
-    - libopenvswitch_2.13.0-1_amd64.deb
-    - openvswitch-common_2.13.0-1_amd64.deb
-    - openvswitch-switch_2.13.0-1_amd64.deb
+    - libopenvswitch_2.14.0-1_amd64.deb
+    - openvswitch-common_2.14.0-1_amd64.deb
+    - openvswitch-switch_2.14.0-1_amd64.deb
   when: force_new_ovs_download == True
 
 
@@ -40,9 +40,9 @@
   apt:
     deb: "{{ item }}"
   with_items:
-    - "/tmp/libopenvswitch_2.13.0-1_amd64.deb"
-    - "/tmp/openvswitch-common_2.13.0-1_amd64.deb"
-    - "/tmp/openvswitch-switch_2.13.0-1_amd64.deb"
+    - "/tmp/libopenvswitch_2.14.0-1_amd64.deb"
+    - "/tmp/openvswitch-common_2.14.0-1_amd64.deb"
+    - "/tmp/openvswitch-switch_2.14.0-1_amd64.deb"
   when: force_new_ovs_download == True
 
 
