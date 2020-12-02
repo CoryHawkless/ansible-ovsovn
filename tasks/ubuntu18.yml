@@ -83,5 +83,5 @@
   apt:
     deb: "{{ item }}"
   with_items:
-    - "/tmp/ovn_20.06.0-1_amd64.deb"
+    - "/tmp/ovn_20.09.0-1_amd64.deb"
   when: force_new_ovn_download == True
