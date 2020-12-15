@@ -36,7 +36,7 @@ START(){
 
 {% endif %}
 
-{% if ansible_fqdn in groups['compute_nodes'] %}
+{% if ansible_fqdn in groups['br_provider_nodes'] %}
     echo "Bringing online br-provider for WAN1"
     ovs-vsctl --may-exist add-br br-provider
     ovs-vsctl set open . external-ids:ovn-bridge-mappings=WAN1:br-provider
