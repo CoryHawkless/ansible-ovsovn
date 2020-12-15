@@ -1,6 +1,8 @@
 [Unit]
 Description=OpenVSwitch and OVN Controller service
-After=network.target
+After=network-pre.target systemd-udev-settle.service
+Before=networking.service
+
 StartLimitIntervalSec=0
 
 [Service]

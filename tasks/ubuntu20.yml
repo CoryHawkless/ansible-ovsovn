@@ -53,7 +53,7 @@
 - name: "Set fact to true if the source file exists but the MD5 sum does not match"
   set_fact:
     force_new_ovn_download: "{{ ovn_nbctl_exists.stat.checksum != ovn_nbctl_md5_value }}"
-  when: ovn_nbctl_exists.stat.exists == True
+  when: ovn_nbctl_exists.stat.exists == True and use_ovn==true
 
 #- debug: msg={{ovn_nbctl_md5_value}}
 #- debug: msg={{ovn_nbctl_exists}}
@@ -61,13 +61,13 @@
 - name: "Set fact to true if the source file does not exist"
   set_fact:
     force_new_ovn_download: True
-  when: ovn_nbctl_exists.stat.exists == False
+  when: ovn_nbctl_exists.stat.exists == False and use_ovn==true
 
 - debug: msg="Installing OVN"
-  when: force_new_ovn_download == True
+  when: force_new_ovn_download == True  and use_ovn==true
 
 - debug: msg="NOT Installing OVN, MD5 sum matches"
-  when: force_new_ovn_download == False
+  when: force_new_ovn_download == False  and use_ovn==true
 
 - name: "Copy OVN binaries"
   copy:
@@ -75,11 +75,11 @@
     dest: "/tmp/{{item}}"
   with_items:
     - ovn_20.06.0-1_amd64.deb
-  when: force_new_ovn_download == True
+  when: force_new_ovn_download == True and use_ovn==true
 
 - name: "Install packages"
   apt:
     deb: "{{ item }}"
   with_items:
     - "/tmp/ovn_20.06.0-1_amd64.deb"
-  when: force_new_ovn_download == True
+  when: force_new_ovn_download == True and use_ovn==true
