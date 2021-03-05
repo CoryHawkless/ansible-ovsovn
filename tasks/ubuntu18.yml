@@ -1,37 +1,41 @@
 
-- set_fact:
+- name: set ovsdb_server_md5_value fact
+  set_fact:
     ovsdb_server_md5_value: "ffd9ba2a6b3da6108d7eb97c70e51761"
 
-- set_fact:
+- name: set ovn_nbctl_md5_value fact
+  set_fact:
     ovn_nbctl_md5_value: "031e770fd969617c221b156726c2f1dc"
 
 
 - name: "Set fact to true if the source file exists but the MD5 sum does not match"
   set_fact:
     force_new_ovs_download: "{{ ovsdb_server_exists.stat.checksum != ovsdb_server_md5_value }}"
-  when: ovsdb_server_exists.stat.exists == True
+  when: ovsdb_server_exists.stat.exists
 
 
 - name: "Set fact to true if the source file does not exist"
   set_fact:
     force_new_ovs_download: True
-  when: ovsdb_server_exists.stat.exists == False
+  when: not ovsdb_server_exists.stat.exists
 
-- debug: msg="Installing OpenVSwitch"
-  when: force_new_ovs_download == True
+- name: Debug out force_new_ovs_download
+  debug: msg="Installing OpenVSwitch"
+  when: force_new_ovs_download
 
-- debug: msg="NOT Installing OpenVSwitch, MD5 sum matches"
-  when: force_new_ovs_download == False
+- name: Debug out force_new_ovs_download
+  debug: msg="NOT Installing OpenVSwitch, MD5 sum matches"
+  when: not force_new_ovs_download
 
 - name: "Copy OVN binaries"
   copy:
-    src: "ubuntu18/{{item}}"
-    dest: "/tmp/{{item}}"
+    src: "ubuntu18/{{ item }}"
+    dest: "/tmp/{{ item }}"
   with_items:
     - libopenvswitch_2.14.0-1_amd64.deb
     - openvswitch-common_2.14.0-1_amd64.deb
     - openvswitch-switch_2.14.0-1_amd64.deb
-  when: force_new_ovs_download == True
+  when: force_new_ovs_download
 
 
 
@@ -43,7 +47,7 @@
     - "/tmp/libopenvswitch_2.14.0-1_amd64.deb"
     - "/tmp/openvswitch-common_2.14.0-1_amd64.deb"
     - "/tmp/openvswitch-switch_2.14.0-1_amd64.deb"
-  when: force_new_ovs_download == True
+  when: force_new_ovs_download
 
 
 
@@ -55,7 +59,7 @@
 - name: "Set fact to true if the source file exists but the MD5 sum does not match"
   set_fact:
     force_new_ovn_download: "{{ ovn_nbctl_exists.stat.checksum != ovn_nbctl_md5_value }}"
-  when: ovn_nbctl_exists.stat.exists == True
+  when: ovn_nbctl_exists.stat.exists
 
 #- debug: msg={{ovn_nbctl_md5_value}}
 #- debug: msg={{ovn_nbctl_exists}}
@@ -63,25 +67,25 @@
 - name: "Set fact to true if the source file does not exist"
   set_fact:
     force_new_ovn_download: True
-  when: ovn_nbctl_exists.stat.exists == False
+  when: not ovn_nbctl_exists.stat.exists
 
 - debug: msg="Installing OVN"
-  when: force_new_ovn_download == True
+  when: force_new_ovn_download
 
 - debug: msg="NOT Installing OVN, MD5 sum matches"
-  when: force_new_ovn_download == False
+  when: not force_new_ovn_download
 
 - name: "Copy OVN binaries"
   copy:
-    src: "ubuntu18/{{item}}"
-    dest: "/tmp/{{item}}"
+    src: "ubuntu18/{{ item }}"
+    dest: "/tmp/{{ item }}"
   with_items:
     - ovn_20.09.0-1_amd64.deb
-  when: force_new_ovn_download == True
+  when: force_new_ovn_download
 
 - name: "Install packages"
   apt:
     deb: "{{ item }}"
   with_items:
     - "/tmp/ovn_20.09.0-1_amd64.deb"
-  when: force_new_ovn_download == True
+  when: force_new_ovn_download
